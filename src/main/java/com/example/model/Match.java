@@ -1,9 +1,12 @@
 package com.example.model;
 
 import java.time.Instant;
+import java.util.Objects;
+import java.util.UUID;
 
 public class Match {
 
+    private final UUID id;
     private final String homeTeamName;
     private int homeTeamScore;
     private final String awayTeamName;
@@ -20,6 +23,7 @@ public class Match {
         this.awayTeamName = awayTeamName;
         this.awayTeamScore = awayTeamScore;
         this.createdAt = Instant.now();
+        this.id = UUID.randomUUID();
     }
 
     public String getHomeTeamName() {
@@ -50,7 +54,29 @@ public class Match {
         return createdAt;
     }
 
+    public UUID getId() {
+        return id;
+    }
+
     public int getTotalScore() {
         return homeTeamScore + awayTeamScore;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Match match = (Match) o;
+        return Objects.equals(id, match.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
+
+    @Override
+    public String toString() {
+        return "%s %s - %s %s".formatted(homeTeamName, homeTeamScore, awayTeamName, awayTeamScore);
     }
 }
