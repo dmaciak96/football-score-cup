@@ -1,11 +1,14 @@
 package com.example.repository;
 
 import com.example.exeption.MatchNotFoundException;
+import com.example.exeption.MatchValidationException;
 import com.example.model.Match;
+import com.example.model.MatchUpdateRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,14 +37,53 @@ public class ScoreBoardRepositoryInMemoryImplTest {
     }
 
     @Test
-    void shouldUpdateMatchScoreInFirstMatch() {
+    void shouldThrowValidationExceptionIfAddMatchWithEmptyHomeTeamName() {
         //given
-        var matchToUpdate = (Match) repository.getAll().toArray()[0];
-        matchToUpdate.setHomeTeamScore(10);
-        matchToUpdate.setAwayTeamScore(15);
+        var matchOne = new Match(null, 5, "Poland", 1);
+        var matchTwo = new Match("", 5, "Poland", 1);
+        var matchThree = new Match(" ", 5, "Poland", 1);
 
         //when
-        repository.update(matchToUpdate);
+        //then
+        assertThrows(MatchValidationException.class, () -> repository.create(matchOne));
+        assertThrows(MatchValidationException.class, () -> repository.create(matchTwo));
+        assertThrows(MatchValidationException.class, () -> repository.create(matchThree));
+    }
+
+    @Test
+    void shouldThrowValidationExceptionIfAddMatchWithEmptyAwayTeamName() {
+        //given
+        var matchOne = new Match("Portugal", 5, null, 1);
+        var matchTwo = new Match("Portugal", 5, "", 1);
+        var matchThree = new Match("Portugal", 5, " ", 1);
+
+        //when
+        //then
+        assertThrows(MatchValidationException.class, () -> repository.create(matchOne));
+        assertThrows(MatchValidationException.class, () -> repository.create(matchTwo));
+        assertThrows(MatchValidationException.class, () -> repository.create(matchThree));
+    }
+
+    @Test
+    void shouldThrowValidationExceptionIfAddedMatchWithScoresLessThanZero() {
+        //given
+        var matchOne = new Match("Portugal", -1, "Poland", 1);
+        var matchTwo = new Match("Portugal", 5, "Poland", -1);
+
+        //when
+        //then
+        assertThrows(MatchValidationException.class, () -> repository.create(matchOne));
+        assertThrows(MatchValidationException.class, () -> repository.create(matchTwo));
+    }
+
+    @Test
+    void shouldUpdateMatchScoreInFirstMatch() {
+        //given
+        var originalMatch = (Match) repository.getAll().toArray()[0];
+        var matchUpdateRequest = new MatchUpdateRequest(originalMatch.getId(), 10, 15);
+
+        //when
+        repository.update(matchUpdateRequest);
 
         //then
         var result = (Match) repository.getAll().toArray()[0];
@@ -49,18 +91,17 @@ public class ScoreBoardRepositoryInMemoryImplTest {
         assertEquals(15, result.getAwayTeamScore());
         assertEquals("Canada", result.getAwayTeamName());
         assertEquals("Mexico", result.getHomeTeamName());
-        assertEquals(matchToUpdate.getId(), result.getId());
+        assertEquals(originalMatch.getId(), result.getId());
     }
 
     @Test
     void shouldUpdateMatchScoreInMiddleMatch() {
         //given
-        var matchToUpdate = (Match) repository.getAll().toArray()[2];
-        matchToUpdate.setHomeTeamScore(10);
-        matchToUpdate.setAwayTeamScore(15);
+        var originalMatch = (Match) repository.getAll().toArray()[2];
+        var matchUpdateRequest = new MatchUpdateRequest(originalMatch.getId(), 10, 15);
 
         //when
-        repository.update(matchToUpdate);
+        repository.update(matchUpdateRequest);
 
         //then
         var result = (Match) repository.getAll().toArray()[2];
@@ -68,18 +109,17 @@ public class ScoreBoardRepositoryInMemoryImplTest {
         assertEquals(15, result.getAwayTeamScore());
         assertEquals("France", result.getAwayTeamName());
         assertEquals("Germany", result.getHomeTeamName());
-        assertEquals(matchToUpdate.getId(), result.getId());
+        assertEquals(originalMatch.getId(), result.getId());
     }
 
     @Test
     void shouldUpdateMatchScoreInEndMatch() {
         //given
-        var matchToUpdate = (Match) repository.getAll().toArray()[4];
-        matchToUpdate.setHomeTeamScore(10);
-        matchToUpdate.setAwayTeamScore(15);
+        var originalMatch = (Match) repository.getAll().toArray()[4];
+        var matchUpdateRequest = new MatchUpdateRequest(originalMatch.getId(), 10, 15);
 
         //when
-        repository.update(matchToUpdate);
+        repository.update(matchUpdateRequest);
 
         //then
         var result = (Match) repository.getAll().toArray()[4];
@@ -87,13 +127,13 @@ public class ScoreBoardRepositoryInMemoryImplTest {
         assertEquals(15, result.getAwayTeamScore());
         assertEquals("Australia", result.getAwayTeamName());
         assertEquals("Argentina", result.getHomeTeamName());
-        assertEquals(matchToUpdate.getId(), result.getId());
+        assertEquals(originalMatch.getId(), result.getId());
     }
 
     @Test
     void shouldThrowNotFoundExceptionWhenTryToUpdateScoreForNotExistingMatch() {
         //given
-        var matchToUpdate = new Match("Portugal", 5, "Poland", 1);
+        var matchToUpdate = new MatchUpdateRequest(UUID.randomUUID(), 10, 15);
 
         //when
         //then
