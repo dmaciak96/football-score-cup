@@ -1,5 +1,6 @@
 package com.example.repository;
 
+import com.example.DataProvider;
 import com.example.exeption.MatchNotFoundException;
 import com.example.exeption.MatchValidationException;
 import com.example.model.Match;
@@ -7,7 +8,6 @@ import com.example.model.MatchUpdateRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,7 +18,7 @@ public class ScoreBoardRepositoryInMemoryImplTest {
 
     @BeforeEach
     public void setUp() {
-        repository = new ScoreBoardRepositoryInMemoryImpl(createInitialMatchList());
+        repository = new ScoreBoardRepositoryInMemoryImpl(DataProvider.createInitialMatchList());
     }
 
 
@@ -163,14 +163,5 @@ public class ScoreBoardRepositoryInMemoryImplTest {
 
         //then
         assertFalse(result);
-    }
-
-    private List<Match> createInitialMatchList() {
-        return List.of(
-                new Match("Mexico", 0, "Canada", 5),
-                new Match("Spain", 10, "Brazil", 2),
-                new Match("Germany", 2, "France", 2),
-                new Match("Uruguay", 6, "Italy", 6),
-                new Match("Argentina", 3, "Australia", 1));
     }
 }
